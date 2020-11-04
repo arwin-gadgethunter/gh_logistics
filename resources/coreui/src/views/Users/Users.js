@@ -1,70 +1,127 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { Badge, Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
+import React, { useState, useEffect } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
+import {
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CCol,
+  CDataTable,
+  CRow,
+  CPagination,
+  CModal,
+  CModalBody,
+  CModalFooter,
+  CModalHeader,
+  CModalTitle,
+  CButton,
+  CForm,
+  CFormText,
+  CLabel,
+  CInput,
+  CFormGroup,
+} from '@coreui/react'
 
 import usersData from './UsersData'
 
-function UserRow(props) {
-  const user = props.user
-  const userLink = `/users/${user.id}`
+const getBadge = status => {
+  switch (status) {
+    case 'Active': return 'success'
+    case 'Inactive': return 'secondary'
+    case 'Pending': return 'warning'
+    case 'Banned': return 'danger'
+    default: return 'primary'
+  }
+}
 
-  const getBadge = (status) => {
-    return status === 'Active' ? 'success' :
-      status === 'Inactive' ? 'secondary' :
-        status === 'Pending' ? 'warning' :
-          status === 'Banned' ? 'danger' :
-            'primary'
+const Users = () => {
+  const history = useHistory()
+  const queryPage = useLocation().search.match(/page=([0-9]+)/, '')
+  const currentPage = Number(queryPage && queryPage[1] ? queryPage[1] : 1)
+  const [page, setPage] = useState(currentPage)
+
+  const [warning, setWarning] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  const pageChange = newPage => {
+    currentPage !== newPage && history.push(`/users?page=${newPage}`)
   }
 
+  useEffect(() => {
+    currentPage !== page && setPage(currentPage)
+  }, [currentPage, page])
+
   return (
-    <tr key={user.id.toString()}>
-      <th scope="row"><Link to={userLink}>{user.id}</Link></th>
-      <td><Link to={userLink}>{user.name}</Link></td>
-      <td>{user.registered}</td>
-      <td>{user.role}</td>
-      <td><Link to={userLink}><Badge color={getBadge(user.status)}>{user.status}</Badge></Link></td>
-    </tr>
+   <>
+    <CRow>
+      <CCol xl={12}>
+        <CCard>
+          <CCardHeader>
+            Users
+            <CButton color="primary" onClick={() => setWarning(!success)} size="sm" className="mr-1 float-right" size="sm">Add User</CButton>
+          </CCardHeader>
+          <CCardBody>
+          <CDataTable
+            items={usersData}
+            fields={[
+              { key: 'name', _classes: 'font-weight-bold' },
+              'registered', 'role', 'status'
+            ]}
+            hover
+            striped
+            itemsPerPage={5}
+            activePage={page}
+            clickableRows
+            onRowClick={(item) => history.push(`/users/${item.id}`)}
+            scopedSlots = {{
+              'status':
+                (item)=>(
+                  <td>
+                    <CButton color="success" onClick={() => setSuccess(!success)} size="sm" className="mr-1">Edit</CButton>&nbsp;
+                    <CButton color="warning" onClick={() => setWarning(!success)} size="sm" className="mr-1" size="sm">Delete</CButton>
+                  </td>
+                )
+            }}
+          />
+          <CPagination
+            activePage={page}
+            onActivePageChange={pageChange}
+            pages={5}
+            doubleArrows={false} 
+            align="center"
+          />
+          </CCardBody>
+        </CCard>
+      </CCol>
+    </CRow>
+
+    <CModal
+        show={warning}
+        onClose={() => setWarning(!warning)}
+        color="primary"
+      >
+        <CModalHeader closeButton>
+          <CModalTitle>Add Position</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+              <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
+                <CFormGroup row>
+                  <CCol md="3">
+                    <CLabel htmlFor="text-input">Position</CLabel>
+                  </CCol>
+                  <CCol xs="12" md="9">
+                    <CInput id="text-input" name="text-input" placeholder="Enter Position" />
+                    <CFormText>This is a help text</CFormText>
+                  </CCol>
+                </CFormGroup>
+              </CForm>
+              </CModalBody>
+        <CModalFooter>
+          <CButton CButton color="primary" onClick={() => setWarning(!warning)}>Proceed</CButton>{' '}
+          <CButton color="secondary" onClick={() => setWarning(!warning)}>Cancel</CButton>
+        </CModalFooter>
+      </CModal>
+      </>
   )
 }
 
-class Users extends Component {
-
-  render() {
-
-    const userList = usersData.filter((user) => user.id < 10)
-
-    return (
-      <div className="animated fadeIn">
-        <Row>
-          <Col xl={6}>
-            <Card>
-              <CardHeader>
-                <i className="fa fa-align-justify"></i> Users <small className="text-muted">example</small>
-              </CardHeader>
-              <CardBody>
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th scope="col">id</th>
-                      <th scope="col">name</th>
-                      <th scope="col">registered</th>
-                      <th scope="col">role</th>
-                      <th scope="col">status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {userList.map((user, index) =>
-                      <UserRow key={index} user={user}/>
-                    )}
-                  </tbody>
-                </Table>
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-      </div>
-    )
-  }
-}
-
-export default Users;
+export default Users
