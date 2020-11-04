@@ -39,9 +39,10 @@ const Users = () => {
   const currentPage = Number(queryPage && queryPage[1] ? queryPage[1] : 1)
   const [page, setPage] = useState(currentPage)
 
-  const [warning, setWarning] = useState(false)
-  const [success, setSuccess] = useState(false)
-
+  const [removeitem, setRemove] = useState(false)
+  const [add, setAdd] = useState(false)
+  const [edit, setEdit] = useState(false)
+  
   const pageChange = newPage => {
     currentPage !== newPage && history.push(`/users?page=${newPage}`)
   }
@@ -57,27 +58,27 @@ const Users = () => {
         <CCard>
           <CCardHeader>
             Users
-            <CButton color="primary" onClick={() => setWarning(!success)} size="sm" className="mr-1 float-right" size="sm">Add User</CButton>
+            <CButton color="primary" onClick={() => setAdd(!add)} size="sm" className="mr-1 float-right" size="sm">Add User</CButton>
           </CCardHeader>
           <CCardBody>
           <CDataTable
             items={usersData}
             fields={[
-              { key: 'name', _classes: 'font-weight-bold' },
-              'registered', 'role', 'status'
+              { key: 'position_name', _classes: 'font-weight-bold' },
+              'visible', 'created_at', 'updated_at'
             ]}
             hover
             striped
             itemsPerPage={5}
             activePage={page}
             clickableRows
-            onRowClick={(item) => history.push(`/users/${item.id}`)}
+            // onRowClick={(item) => history.push(`/users/${item.id}`)}
             scopedSlots = {{
-              'status':
+              'visible':
                 (item)=>(
                   <td>
-                    <CButton color="success" onClick={() => setSuccess(!success)} size="sm" className="mr-1">Edit</CButton>&nbsp;
-                    <CButton color="warning" onClick={() => setWarning(!success)} size="sm" className="mr-1" size="sm">Delete</CButton>
+                    <CButton color="success" onClick={() => setEdit(!edit)} size="sm" className="mr-1">Edit</CButton>&nbsp;
+                    <CButton color="warning" onClick={() => setRemove(!removeitem)} size="sm" className="mr-1" size="sm">Delete</CButton>
                   </td>
                 )
             }}
@@ -94,9 +95,10 @@ const Users = () => {
       </CCol>
     </CRow>
 
+    /* ADD MODAL */
     <CModal
-        show={warning}
-        onClose={() => setWarning(!warning)}
+        show={add}
+        onClose={() => setAdd(!add)}
         color="primary"
       >
         <CModalHeader closeButton>
@@ -116,8 +118,57 @@ const Users = () => {
               </CForm>
               </CModalBody>
         <CModalFooter>
-          <CButton CButton color="primary" onClick={() => setWarning(!warning)}>Proceed</CButton>{' '}
-          <CButton color="secondary" onClick={() => setWarning(!warning)}>Cancel</CButton>
+          <CButton color="primary" onClick={() => setWarning(!warning)}>Proceed</CButton>{' '}
+          <CButton color="secondary" onClose={() => setAdd(!add)}>Cancel</CButton>
+        </CModalFooter>
+      </CModal>
+
+      /* EDIT MODAL */
+      <CModal
+        show={edit}
+        onClose={() => setEdit(!edit)}
+        color="success"
+      >
+        <CModalHeader closeButton>
+          <CModalTitle>Edit Position</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+              <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
+                <CFormGroup row>
+                  <CCol md="3">
+                    <CLabel htmlFor="text-input">Position</CLabel>
+                  </CCol>
+                  <CCol xs="12" md="9">
+                    <CInput id="text-input" name="text-input" placeholder="Enter Position" />
+                    <CFormText>This is a help text</CFormText>
+                  </CCol>
+                </CFormGroup>
+              </CForm>
+              </CModalBody>
+        <CModalFooter>
+          <CButton color="success" onClick={() => setEdit(!warning)}>Save Changes</CButton>{' '}
+          <CButton color="secondary" onClose={() => setEdit(!edit)}>Cancel</CButton>
+        </CModalFooter>
+      </CModal>
+
+      /* DELETE MODAL */
+      <CModal
+        show={removeitem}
+        onClose={() => setRemove(!removeitem)}
+        color="warning"
+      >
+        <CModalHeader closeButton>
+          <CModalTitle>Delete Order</CModalTitle>
+        </CModalHeader>
+        <CModalBody>
+              <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
+                <h5>Are you sure you want to permanently delete this item?</h5>
+              </CForm>
+
+              </CModalBody>
+        <CModalFooter>
+          <CButton color="warning" onClick={() => setWarning(!warning)}>Proceed</CButton>{' '}
+          <CButton color="secondary" onClose={() => setWarning(!removeitem)}>Cancel</CButton>
         </CModalFooter>
       </CModal>
       </>

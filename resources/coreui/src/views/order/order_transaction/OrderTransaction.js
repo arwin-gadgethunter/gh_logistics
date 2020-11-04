@@ -119,7 +119,7 @@ const Tables = () => {
 
               </CModalBody>
         <CModalFooter>
-          <CButton color="primary" onClick={() => setWarning(!warning)}>Proceed</CButton>{' '}
+          <CButton color="warning" onClick={() => setWarning(!warning)}>Proceed</CButton>{' '}
           <CButton color="secondary" onClick={() => setWarning(!warning)}>Cancel</CButton>
         </CModalFooter>
       </CModal>
